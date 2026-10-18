@@ -31,7 +31,7 @@ enum class Side {
 
 struct Order {
 
-    OrderID orderID;
+    OrderID id;
     Price price;
     OrderType orderType;
     Side side;
