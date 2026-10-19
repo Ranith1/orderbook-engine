@@ -31,10 +31,10 @@ Orderbook functionality - funtion declarations
     // cancelling an order
     bool cancelOrder(OrderID id);
 
-    /* for testing + future networking applications */
+   
 
-    // std::optional<Price> bestBid() const;
-    // std::optional<Price> bestAsk() const;
+    std::optional<Price> bestBid() const;
+    std::optional<Price> bestAsk() const;
 
 private: 
 

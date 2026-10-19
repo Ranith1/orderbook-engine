@@ -144,3 +144,23 @@ void Orderbook::addResting(Order order){
 
 
 }
+
+std::optional<Price> Orderbook::bestBid() const {
+
+    if (bids_.empty()) {
+        return std::nullopt;
+    }
+
+    return bids_.begin() -> first;
+
+}
+
+std::optional<Price> Orderbook::bestAsk() const {
+
+    if (asks_.empty()) {
+        return std::nullopt;
+    }
+
+    return asks_.begin()->first;
+
+}
