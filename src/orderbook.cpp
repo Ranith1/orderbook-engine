@@ -8,7 +8,7 @@
 void Orderbook::addOrder(Order order) {
 
     // Cannot trade an order of 0
-    if (order.quantity = 0) {
+    if (order.quantity == 0) {
         return;
     }
 
@@ -42,14 +42,105 @@ bool Orderbook::cancelOrder(OrderID id){
 
     // find the correct map, dependent on side order belonds to
     // use price to find the queue, then remove the order using the saved iterator
+    
+    if (location.side == Side::Bid) {
+
+        auto levelIterator = bids_.find(location.price);
+        levelIterator->second.erase(location.it);
+
+        if (levelIterator->second.empty()){
+            bids_.erase(levelIterator);
+        }
+
+    } else {
+        auto levelIterator = asks_.find(location.price);
+        levelIterator->second.erase(location.it);
+
+        if(levelIterator->second.empty()) {
+            asks_.erase(levelIterator);
+        }
+    }
+
+    // Removing the cancelled order from the hash table
+    orders_.erase(orderEntry);
+    return true;
 
 }
 // Matching 
 void Orderbook::match(Order& incoming) {
-    return;
+    
+    auto matchAgainst = [&](auto& otherSide, auto canTrade){
+    
+        while (incoming.quantity > 0 && !otherSide.empty()) {
+
+            // Best price on the other side
+            auto levelIterator = otherSide.begin();
+            Price levelPrice = levelIterator->first;
+
+            // Limit orders stop filling at undesired prices
+            if (incoming.orderType == OrderType::Limit && !canTrade(levelPrice)) {
+                break;
+            }
+
+            OrderQueue& queue = levelIterator->second;
+
+            // Filling the oldest orders
+            while (incoming.quantity > 0 && !queue.empty()) {
+
+                Order& resting = queue.front();
+                uint64_t tradeQty = std::min(incoming.quantity, resting.quantity);
+
+                incoming.quantity -= tradeQty;
+                resting.quantity -= tradeQty;
+
+                // Remove a fully filled order from the hash table.
+                if (resting.quantity == 0) {
+                    orders_.erase(resting.id);
+                    queue.pop_front();
+                }
+            }
+
+            // Remove the level once there are no ideas left at this price.
+            if (queue.empty()) {
+                otherSide.erase(levelIterator);
+            }
+
+            
+        }
+
+
+    };
+
+    //  A buy trading against an ask is fine if ask <= buy limit
+    // A sell trading against a bid is fine if bid >= sell limit
+    if (incoming.side == Side::Bid) {
+        matchAgainst(asks_, [&](Price askPrice) {
+            return askPrice <= incoming.price;
+        });
+    } else {
+        matchAgainst(bids_, [&](Price bidPrice) {
+            return bidPrice >= incoming.price;
+        });
+    }
+
+
 }
 
 // addResting
+// Placing leftover (partially filled) limit orders into the book, then recording it in the hash table
 void Orderbook::addResting(Order order){
-    return;
+    
+    // Saving information
+    Side side = order.side;
+    Price price = order.price;
+    OrderID id = order.id;
+
+    OrderQueue& queue = (side == Side::Bid) ? bids_[price] : asks_[price];
+
+    // Newestr order goes to the back 
+    queue.push_back(std::move(order));
+
+    orders_.emplace(id, OrderLocation{side, price, std::prev(queue.end())});
+
+
 }
