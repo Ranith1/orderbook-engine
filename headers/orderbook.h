@@ -62,6 +62,8 @@ private:
     // Cancelling orders
     std::unordered_map<OrderID, OrderLocation> orders_;
 
+    // ID given to the next eligible order
+    OrderID nextId_ = 1;
 
     void match(Order& incoming);
     void addResting(Order order);

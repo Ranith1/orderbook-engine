@@ -12,6 +12,10 @@ void Orderbook::addOrder(Order order) {
         return;
     }
 
+    // assign an ID to the order
+    order.id = nextId_++;
+
+
     // An order with this ID already exists in the hash table
     if (orders_.contains(order.id)) {
         return;

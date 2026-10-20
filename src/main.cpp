@@ -27,8 +27,70 @@ void printBestBidandBestAsk(const Orderbook& book) {
     }
 
 }
+// Turns sample data into an order
+// False if the line isn't structured properly
+bool processOrder(std::istringstream& in, Order& order) {
+    
+    std::string side, type;
+
+    if (side == "BUY") {
+        order.side = Side::Bid;
+
+    } else if (side == "SELL") {
+        order.side = Side::Ask;
+
+    } else {
+        return false;
+    }
+
+    if (type == "LIMIT") {
+        order.orderType = OrderType::Limit;
+    } else if (type == "MARKET") {
+        order.orderType = OrderType::Market;
+    } else {
+        return false;
+    }
+
+    return true;
+}
 
 
-int main() {
-    return 0;
+// mainn
+
+int main(int argc, char* argv[]) {
+
+    if (argc < 2) {
+        return;
+    }
+
+    
+    Orderbook book;
+    std::string line;
+
+    std::ifstream file(argv[1]);
+
+    while (std::getline(file,line)) {
+
+        std::istringstream in(line);
+        std::string command;
+        in >> command;
+
+        if (command == "ADD") {
+
+            Order order{};
+            processOrder(in, order);
+            book.addOrder(order);
+
+        } else if(command == "CANCEL") {
+
+            OrderID id;
+            in >> id;
+            book.cancelOrder(id); }
+
+
+    }
+    std::cout << "The best bid and ask: \n";
+    printBestBidandBestAsk(book);
+
+
 }
