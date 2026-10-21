@@ -23,7 +23,7 @@ void printBestBidandBestAsk(const Orderbook& book) {
     if (ask) {
         std::cout << "ask: " << *ask << '\n';
     } else {
-        std::cout << "bid: none\n";
+        std::cout << "ask: none\n";
     }
 
 }
@@ -32,6 +32,7 @@ void printBestBidandBestAsk(const Orderbook& book) {
 bool processOrder(std::istringstream& in, Order& order) {
     
     std::string side, type;
+    in >> side >> type >> order.price >> order.quantity;
 
     if (side == "BUY") {
         order.side = Side::Bid;
@@ -60,7 +61,7 @@ bool processOrder(std::istringstream& in, Order& order) {
 int main(int argc, char* argv[]) {
 
     if (argc < 2) {
-        return;
+        return 1;
     }
 
     

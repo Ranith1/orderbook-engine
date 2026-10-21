@@ -5,21 +5,15 @@
 
 // addOrder
 
-void Orderbook::addOrder(Order order) {
+std::optional<OrderID> Orderbook::addOrder(Order order) {
 
     // Cannot trade an order of 0
     if (order.quantity == 0) {
-        return;
+        return std::nullopt;
     }
 
     // assign an ID to the order
     order.id = nextId_++;
-
-
-    // An order with this ID already exists in the hash table
-    if (orders_.contains(order.id)) {
-        return;
-    }
 
     // Match a trade with the other side as much as possible
     match(order);
@@ -30,6 +24,7 @@ void Orderbook::addOrder(Order order) {
         addResting(order);
     }
     
+    return order.id;
 
 }
 
