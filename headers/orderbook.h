@@ -27,7 +27,7 @@ Orderbook functionality - funtion declarations
 */
 
     // adding an order
-    void addOrder(Order order);
+    std::optional<OrderID> addOrder(Order order);
     // cancelling an order
     bool cancelOrder(OrderID id);
 
